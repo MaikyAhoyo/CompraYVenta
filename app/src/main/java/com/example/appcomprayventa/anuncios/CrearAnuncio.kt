@@ -1,6 +1,5 @@
 package com.example.appcomprayventa.anuncios
 
-import android.Manifest
 import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Intent
@@ -30,6 +29,7 @@ class CrearAnuncio : AppCompatActivity() {
     private var imagenUri : Uri?=null
     private lateinit var imagenSelecArrayList : ArrayList<ModeloImagenSeleccionada>
     private lateinit var adaptadorImagenSel : AdaptadorImagenSeleccionada
+    private var imageUri: Uri?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,19 +75,23 @@ class CrearAnuncio : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { item ->
             val itemId = item.itemId
             if (itemId == 1) {
+                // Funcionalidad para la Cámara
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-                    concederPermisosCamara.launch(arrayOf(Manifest.permission.CAMERA))
+                    concederPermisosCamara.launch(arrayOf(android.Manifest.permission.CAMERA))
                 } else {
                     concederPermisosCamara.launch(arrayOf(
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        android.Manifest.permission.CAMERA,
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
                     ))
                 }
             } else if (itemId == 2) {
+                // Funcionalidad para la Galería
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-                    concederPermisosAlmacenamiento.launch(Manifest.permission.READ_MEDIA_IMAGES)
+                    imagenGaleria()
                 } else {
-                    concederPermisosAlmacenamiento.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    concederPermisosAlamecenamiento.launch(
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    )
                 }
             }
             return@setOnMenuItemClickListener true
@@ -95,7 +99,8 @@ class CrearAnuncio : AppCompatActivity() {
     }
 
     private val concederPermisosCamara =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { resultado ->
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { resultado ->
             var concedidoTodos = true
             for (seConcede in resultado.values) {
                 concedidoTodos = concedidoTodos && seConcede
@@ -104,16 +109,25 @@ class CrearAnuncio : AppCompatActivity() {
             if (concedidoTodos) {
                 imagenCamara()
             } else {
-                Toast.makeText(this, "Permisos de cámara denegados", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "No se concedieron permisos",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
-    private val concederPermisosAlmacenamiento =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { esConcedido ->
+    private val concederPermisosAlamecenamiento =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()) { esConcedido ->
             if (esConcedido) {
                 imagenGaleria()
             } else {
-                Toast.makeText(this, "Permiso de almacenamiento denegado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "El permiso de almacenamiento se denegó",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -121,19 +135,26 @@ class CrearAnuncio : AppCompatActivity() {
         val contentValues = ContentValues()
         contentValues.put(MediaStore.Images.Media.TITLE, "Titulo_imagen")
         contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Descripcion_imagen")
-        imagenUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imagenUri)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
         resultadoCamara_ARL.launch(intent)
     }
 
     private val resultadoCamara_ARL =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ resultado ->
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()){ resultado ->
             if(resultado.resultCode == RESULT_OK){
-                agregarImagenALista(imagenUri)
+                val data = resultado.data
+                imageUri = data!!.data
+                agregarImagenALista(imageUri)
             } else {
-                Toast.makeText(this, "Captura cancelada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "La captura de imagen se canceló",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -144,13 +165,18 @@ class CrearAnuncio : AppCompatActivity() {
     }
 
     private val resultadoGaleria_ARL =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ resultado ->
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()){ resultado ->
             if(resultado.resultCode == RESULT_OK){
                 val data = resultado.data
-                imagenUri = data!!.data
-                agregarImagenALista(imagenUri)
+                imageUri = data!!.data
+                agregarImagenALista(imageUri)
             } else {
-                Toast.makeText(this, "Selección cancelada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "La selección de imagen se canceló",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
