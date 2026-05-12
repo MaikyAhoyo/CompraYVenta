@@ -7,10 +7,13 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
@@ -22,6 +25,9 @@
         android:roundIcon="@mipmap/ic_compra_venta_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompraYVenta">
+        <activity
+            android:name=".chat.ChatActivity"
+            android:exported="false" />
         <activity
             android:name=".anuncios.CrearAnuncio"
             android:exported="false" />

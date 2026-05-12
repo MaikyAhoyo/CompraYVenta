@@ -11,13 +11,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 class RegistroEmail : AppCompatActivity() {
-
     private lateinit var binding: ActivityRegistroEmailBinding
 
     private lateinit var firebaseAuth: FirebaseAuth
-
     private lateinit var progressDialog: ProgressDialog
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegistroEmailBinding.inflate(layoutInflater)
@@ -35,11 +32,14 @@ class RegistroEmail : AppCompatActivity() {
 
     }
 
+    private var nombre = ""
     private var email = ""
     private var password = ""
     private var r_password = ""
 
+
     private fun validarInfo() {
+        nombre = binding.EtNombres.text.toString().trim()
         email = binding.EtEmail.text.toString().trim()
         password = binding.EtPassword.text.toString().trim()
         r_password = binding.EtRPassword.text.toString().trim()
@@ -63,9 +63,16 @@ class RegistroEmail : AppCompatActivity() {
         }else if (password != r_password){
             binding.EtRPassword.error = "No coinciden"
             binding.EtRPassword.requestFocus()
-        }else{
+        }else if (nombre.isEmpty()) {
+            binding.EtNombres.error = "Ingrese un nombre"
+            binding.EtNombres.requestFocus()
+        }
+        else{
             registrarUsuario()
         }
+
+
+
     }
 
     private fun registrarUsuario() {
@@ -89,10 +96,11 @@ class RegistroEmail : AppCompatActivity() {
         val tiempo = Constantes.obtenerTiempoDis()
         val emailUsuario = firebaseAuth.currentUser!!.email
         val uidUsuario = firebaseAuth.uid
+        val nombre = binding.EtNombres.text.toString().trim()
 
         val hashMap = HashMap<String, Any>()
 
-        hashMap["nombres"] = ""
+        hashMap["nombres"] = "${nombre}"
         hashMap["codigoTelefono"] = ""
         hashMap["telefono"] = ""
         hashMap["urlImagenPerfil"] = ""
@@ -116,6 +124,12 @@ class RegistroEmail : AppCompatActivity() {
                 progressDialog.dismiss()
                 Toast.makeText(this,"No se registró debido a ${exception.message}",
                     Toast.LENGTH_SHORT).show()
+
+
             }
+
+
     }
+
+
 }

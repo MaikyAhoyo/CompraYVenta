@@ -9,21 +9,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.appcomprayventa.databinding.ActivityOpcionesLoginBinding
 import com.example.appcomprayventa.opciones_login.LoginEmail
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 
 class OpcionesLogin : AppCompatActivity() {
 
     private lateinit var binding: ActivityOpcionesLoginBinding
-
     private lateinit var firebaseAuth: FirebaseAuth
-
-    private lateinit var mGoogleSignInClient: GoogleSignInClient
-
+    private lateinit var mGoogleSigInClient: GoogleSignInClient
     private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,12 +28,11 @@ class OpcionesLogin : AppCompatActivity() {
         binding = ActivityOpcionesLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        firebaseAuth = FirebaseAuth.getInstance()
-
         progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Espere por favor")
         progressDialog.setCanceledOnTouchOutside(false)
 
+        firebaseAuth = FirebaseAuth.getInstance()
         comprobarSesion()
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -44,7 +40,7 @@ class OpcionesLogin : AppCompatActivity() {
             .requestEmail()
             .build()
 
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+        mGoogleSigInClient = GoogleSignIn.getClient(this, gso)
 
         binding.IngresarGoogle.setOnClickListener {
             googleLogin()
@@ -55,21 +51,22 @@ class OpcionesLogin : AppCompatActivity() {
         }
     }
 
-    private fun googleLogin(){
-        val googleSignInIntent = mGoogleSignInClient.signInIntent
-        googleSingInARL.launch(googleSignInIntent)
+    private fun googleLogin() {
+        val googleSignInIntent = mGoogleSigInClient.signInIntent
+        googleSignInARL.launch(googleSignInIntent)
     }
 
-    private val googleSingInARL= registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()){ resultado ->
-        if(resultado.resultCode== RESULT_OK){
-            val data=resultado.data
-            val task=GoogleSignIn.getSignedInAccountFromIntent(data)
-            try{
-                val cuenta= task.getResult(ApiException::class.java)
+    private val googleSignInARL = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { resultado ->
+        if (resultado.resultCode == RESULT_OK) {
+            val data = resultado.data
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val cuenta = task.getResult(ApiException::class.java)
                 autenticacionGoogle(cuenta.idToken)
-            }catch (e: Exception){
-                Toast.makeText(this, "${e.message }", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this, "${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -78,15 +75,15 @@ class OpcionesLogin : AppCompatActivity() {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener { resultadoAuth ->
-                if (resultadoAuth.additionalUserInfo!!.isNewUser) {
+                if (resultadoAuth.additionalUserInfo!!.isNewUser){
                     llenarInfoBD()
-                } else {
+                } else{
                     startActivity(Intent(this, MainActivity::class.java))
                     finishAffinity()
                 }
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "${e.message}", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e->
+                Toast.makeText(this, "Fallo en la autenticacion", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -96,7 +93,7 @@ class OpcionesLogin : AppCompatActivity() {
         val tiempo = Constantes.obtenerTiempoDis()
         val emailUsuario = firebaseAuth.currentUser!!.email
         val uidUsuario = firebaseAuth.uid
-        val nombreUsuario = firebaseAuth.currentUser!!.displayName
+        val nombreUsuario = firebaseAuth.currentUser?.displayName
 
         val hashMap = HashMap<String, Any>()
 
@@ -125,13 +122,18 @@ class OpcionesLogin : AppCompatActivity() {
                 Toast.makeText(this,"No se registró debido a ${exception.message}",
                     Toast.LENGTH_SHORT).show()
 
+
             }
+
+
     }
 
     private fun comprobarSesion(){
-        if (firebaseAuth.currentUser != null){
-        startActivity(Intent(this, MainActivity::class.java))
-        finishAffinity()
+        if(firebaseAuth.currentUser != null){
+            startActivity(Intent(this, MainActivity::class.java))
+            finishAffinity()
         }
     }
+
+
 }

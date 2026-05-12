@@ -33,6 +33,10 @@ class LoginEmail : AppCompatActivity() {
         binding.BtnIngresar.setOnClickListener {
             validarInfo()
         }
+
+        binding.TxtRegistrarme.setOnClickListener {
+            startActivity(Intent(this, RegistroEmail::class.java))
+        }
     }
 
     private var email = ""
